@@ -62,7 +62,8 @@ def test_call_ml_service_failure(monkeypatch):
 
 
 def test_query_student_db_success(monkeypatch):
-    def dummy_get(url, params):
+    def dummy_get(self, url, **kwargs):
+        # Include self parameter to match the Session.get method signature
         return DummyResponse(
             200,
             {
@@ -73,16 +74,19 @@ def test_query_student_db_success(monkeypatch):
             },
         )
 
-    monkeypatch.setattr("app.requests.get", dummy_get)
+    # This patches the Session.get method itself
+    monkeypatch.setattr("requests.sessions.Session.get", dummy_get)
+
     result = query_student_db("stu123")
     assert result["name"] == "Alice Johnson"
 
 
 def test_query_student_db_failure(monkeypatch):
-    def dummy_get(url, params):
+    def dummy_get(self, url, **kwargs):
+        # Include self parameter and use **kwargs
         return DummyResponse(404, None, "Student not found")
 
-    monkeypatch.setattr("app.requests.get", dummy_get)
+    monkeypatch.setattr("requests.sessions.Session.get", dummy_get)
     with pytest.raises(Exception) as excinfo:
         query_student_db("stu123")
     assert "Student DB error" in str(excinfo.value)
