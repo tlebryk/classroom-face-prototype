@@ -79,6 +79,5 @@ make all
 - **make stop**: Stops and removes the container.
 - **make all**: Runs tests, builds, and starts the container.
 
----
-
-Use these commands to streamline your development workflow and integrate into your CI/CD pipeline.
+## TODO:
+- fill out real UI and rendering features
