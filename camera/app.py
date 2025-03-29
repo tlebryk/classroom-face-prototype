@@ -6,6 +6,11 @@ import logging
 import traceback
 import socket
 
+import time
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -91,12 +96,6 @@ def call_ml_service(image_data):
         logger.error(f"Unexpected error in call_ml_service: {str(e)}")
         logger.debug(traceback.format_exc())
         raise
-
-
-import time
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 
 def create_retry_session(retries=5, backoff_factor=0.5):

@@ -30,14 +30,14 @@ clean: stop
 	-docker network rm $(NETWORK) 2>/dev/null || true
 
 # Runs tests, builds the production image, and starts the container.
-all:  stop build run
+all: stop build run
 
 # Use curl to test the running container endpoints.
 test-curl:
 	@echo "Testing POST /api/classroom/update"
 	curl -X POST http://localhost:$(HOST_PORT)/api/classroom/update \
 	  -H "Content-Type: application/json" \
-	  -d '{"studentId": "stu123", "name": "Alice Johnson", "seatId": "seat5", "confidence": 0.92, "lastSeen": "2025-03-28T12:34:56Z"}'
+	  -d '{"studentId": "stu123", "name": "Alex Johnson", "seatId": "seat5", "confidence": 0.92, "lastSeen": "2025-03-28T12:34:56Z"}'
 	@echo "\n\nTesting GET /api/classroom"
 	curl http://localhost:$(HOST_PORT)/api/classroom?classroomId=default
 	@echo ""
@@ -48,4 +48,4 @@ test-from-container:
 	docker run --rm --network $(NETWORK) curlimages/curl:latest \
 	  -X POST http://$(SERVICE_NAME):$(PORT)/api/classroom/update \
 	  -H "Content-Type: application/json" \
-	  -d '{"studentId": "stu123", "name": "Alice Johnson", "seatId": "seat5", "confidence": 0.92, "lastSeen": "2025-03-28T12:34:56Z"}'
+	  -d '{"studentId": "stu123", "name": "Andre Johnson", "seatId": "seat1", "confidence": 0.92, "lastSeen": "2025-03-28T12:34:56Z"}'

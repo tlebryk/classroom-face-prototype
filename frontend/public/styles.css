@@ -1,0 +1,103 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.classroom {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 100px;
+    padding: 40px;
+}
+
+.table-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+}
+
+.table {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 174px;
+    background-color: transparent;
+    border: 2px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}
+
+.table-label {
+    color: #333;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.seat {
+    position: absolute;
+    width: 100px;
+    text-align: center;
+}
+
+.seat-name {
+    background-color: white;
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Position seats OUTSIDE the hexagon */
+.seat-1 {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.seat-2 {
+    top: 25%;
+    right: 0;
+}
+
+.seat-3 {
+    bottom: 25%;
+    right: 0;
+}
+
+.seat-4 {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.seat-5 {
+    bottom: 25%;
+    left: 0;
+}
+
+.seat-6 {
+    top: 25%;
+    left: 0;
+}
