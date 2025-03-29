@@ -7,9 +7,9 @@ HOST_PORT ?= 5000
 CONTAINER_PORT ?= 5000
 
 # Environment variables for the real app
-ML_SERVICE_URL ?= http://localhost:5001/api/predict
-STUDENT_DB_URL ?= http://localhost:5000/api/student
-FRONTEND_UI_URL ?= http://localhost:3000/api/classroom/update
+ML_SERVICE_URL ?= http://ml-service:5001/api/predict
+STUDENT_DB_URL ?= http://database:5002/api/student
+FRONTEND_UI_URL ?= http://frontend:3000/api/classroom/update
 
 # Runs the tests in the test stage.
 test:
