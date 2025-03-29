@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  ml-service:
+    build:
+      context: ./ml_service
+      target: production
+    ports:
+      - "5001:5001"
+    networks:
+      - app-network
+
+  database:
+    build:
+      context: ./database
+      target: runtime
+    ports:
+      - "5002:5002"
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+  camera:
+    build:
+      context: ./camera
+      target: runtime
+    environment:
+      - ML_SERVICE_URL=http://ml-service:5001/api/predict
+      - STUDENT_DB_URL=http://database:5002/api/student
+      - FRONTEND_UI_URL=http://frontend:3000/api/classroom/update
+    depends_on:
+      - ml-service
+      - database
+      - frontend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

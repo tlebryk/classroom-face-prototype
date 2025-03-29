@@ -43,7 +43,7 @@ Build and Run the Service
 bash
 Copy
 make all
-This command runs tests, builds the production image, and starts the container in detached mode. The service will be available at http://localhost:5000.
+This command runs tests, builds the production image, and starts the container in detached mode. The service will be available at http://localhost:5001.
 
 Integration Testing with Curl
 bash

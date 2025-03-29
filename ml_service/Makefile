@@ -11,7 +11,7 @@ build:
 
 # Runs the production container in detached mode.
 run:
-	docker run --init -d -p 5000:5000 --name ml-service ml-service
+	docker run --init -d -p 5001:5001 --name ml-service --network app-network ml-service
 
 # Stops and removes the running container.
 stop:
@@ -19,12 +19,12 @@ stop:
 	-docker rm ml-service || true
 
 # Runs tests, builds the production image, and starts the container.
-all: test build run
+all: stop test build run
 
 # Use curl to test the running container endpoint.
 test-curl:
 	@echo "Testing POST /api/predict"
-	curl -X POST http://localhost:5000/api/predict \
+	curl -X POST http://ml-service:5001/api/predict \
 	  -H "Content-Type: application/json" \
 	  -d '{"CollectionId": "student-gallery", "Image": {"Bytes": "dummy"}, "MaxFaces": 1, "FaceMatchThreshold": 80}'
 	@echo ""
