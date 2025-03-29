@@ -1,0 +1,17 @@
+{
+    "name": "frontend",
+    "version": "1.0.0",
+    "description": "Mock frontend service for classroom facial recognition system",
+    "main": "main.js",
+    "scripts": {
+        "start": "node main.js",
+        "test": "mocha --exit"
+    },
+    "dependencies": {
+        "express": "^4.18.2"
+    },
+    "devDependencies": {
+        "mocha": "^10.2.0",
+        "supertest": "^6.3.3"
+    }
+}
