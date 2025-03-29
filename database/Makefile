@@ -1,33 +1,38 @@
-.PHONY: test build run stop all test-curl shell
+.PHONY: test build run stop clean all test-curl shell test-from-container
 
-# Variables
-IMAGE_NAME=database
-CONTAINER_NAME=database
-HOST_PORT=5002
-CONTAINER_PORT=5002
+# Default values - can be overridden at runtime
+NETWORK ?= app-network
+PORT ?= 5002
+HOST_PORT ?= 5002
+SERVICE_NAME ?= database
 
 # Runs the tests in the test stage.
 test:
-	docker build --target test -t $(IMAGE_NAME)-test .
-	docker run --rm $(IMAGE_NAME)-test
+	docker build --target test -t $(SERVICE_NAME)-test .
+	docker run --rm $(SERVICE_NAME)-test
 
 # Builds the production image.
 build:
-	docker build --target runtime -t $(IMAGE_NAME) .
+	docker build --target runtime -t $(SERVICE_NAME) .
 
-# Runs the production container in detached mode.
+# Runs the production container in detached mode using a network.
 run:
-	docker run --init -d -p $(HOST_PORT):$(CONTAINER_PORT) --name $(CONTAINER_NAME) $(IMAGE_NAME)
+	-docker network create $(NETWORK) 2>/dev/null || true
+	docker run --init -d -p $(HOST_PORT):$(PORT) --name $(SERVICE_NAME) --network $(NETWORK) $(SERVICE_NAME)
 
 # Stops and removes the running container.
 stop:
-	-docker stop $(CONTAINER_NAME) || true
-	-docker rm $(CONTAINER_NAME) || true
+	-docker stop $(SERVICE_NAME) || true
+	-docker rm $(SERVICE_NAME) || true
 
-# Stops previous images, runs tests, builds the production image, and starts the container.
-all: stop test build run
+# Clean up the container and the network.
+clean: stop
+	-docker network rm $(NETWORK) 2>/dev/null || true
 
-# Use curl to test the running container endpoints.
+# Stops previous containers, runs tests, builds the production image, and starts the container.
+all: stop build run
+
+# Use curl to test the running container endpoints from the host.
 test-curl:
 	@echo "Testing GET /api/student?studentId=stu123"
 	curl -s http://localhost:$(HOST_PORT)/api/student?studentId=stu123
@@ -39,6 +44,11 @@ test-curl:
 	curl -s http://localhost:$(HOST_PORT)/api/student?studentId=stu789
 	@echo ""
 
+# Test from another container (useful for debugging integration)
+test-from-container:
+	docker run --rm --network $(NETWORK) curlimages/curl:latest \
+	  -X GET http://$(SERVICE_NAME):$(PORT)/api/student?studentId=stu123
+
 # Opens an interactive shell inside a temporary container.
 shell:
-	docker run --rm -it $(IMAGE_NAME) /bin/bash
+	docker run --rm -it $(SERVICE_NAME) /bin/bash
