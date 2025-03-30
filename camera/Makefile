@@ -47,4 +47,4 @@ test-curl:
 
 # Opens an interactive shell inside a temporary container.
 shell:
-	docker run --rm -it $(SERVICE_NAME) /bin/bash
+	docker run --rm -it -v "$(shell pwd):/app" camera /bin/bash

@@ -56,3 +56,6 @@ camera:
 	docker run --rm --network $(NETWORK) \
 	  -e ML_SERVICE_URL=http://$(SERVICE_NAME):$(PORT)/api/predict \
 	  camera 
+	  
+shell:
+	docker run --rm -it -v "$(pwd):/app" $(SERVICE_NAME) /bin/bash
