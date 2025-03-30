@@ -115,7 +115,7 @@ def create_retry_session(retries=5, backoff_factor=0.5):
 
 def query_student_db(student_id):
     STUDENT_DB_URL = os.environ.get(
-        "STUDENT_DB_URL", "http://localhost:5000/api/student"
+        "STUDENT_DB_URL", "http://localhost:5002/api/student"
     )
     logger.info(f"Querying student DB at: {STUDENT_DB_URL} for student: {student_id}")
 
