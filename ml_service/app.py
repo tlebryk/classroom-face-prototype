@@ -1,6 +1,6 @@
 # app.py
 from flask import Flask, request, jsonify
-from utils import display_decoded_image
+from utils import display_decoded_image, save_decoded_image
 
 app = Flask(__name__)
 
@@ -8,14 +8,19 @@ app = Flask(__name__)
 @app.route("/api/predict", methods=["POST"])
 def predict():
     data = request.get_json()
-    # Here we ignore actual ML logic and return a dummy response.
-    # if os.environ.get("DEBUG", "false").lower() == "true":
-    # Attempt to decode and display the image for sanity checking
+    # Extract the base64 encoded image from the payload
     encoded_image = data.get("Image", {}).get("Bytes")
     if encoded_image:
-        display_decoded_image(encoded_image)
+        # Save the decoded image to a file for debugging/inspection
+        saved_path = save_decoded_image(encoded_image)
+        if saved_path:
+            app.logger.info(f"Image saved for inspection at: {saved_path}")
+        else:
+            app.logger.error("Image could not be saved.")
     else:
-        print("No image data found in the request.")
+        app.logger.error("No image data found in the request.")
+
+    # Dummy ML logic for demonstration purposes.
     response = {
         "FaceMatches": [
             {

@@ -22,7 +22,9 @@ run-local:
 # Runs the production container in a network (for integration testing).
 run:
 	-docker network create $(NETWORK) 2>/dev/null || true
-	docker run --init -d -p $(HOST_PORT):$(PORT) --name $(SERVICE_NAME) --network $(NETWORK) $(SERVICE_NAME)
+	docker run --init -d -p $(HOST_PORT):$(PORT) --name $(SERVICE_NAME) \
+	-v $(PWD)/output:/tmp \
+	--network $(NETWORK) $(SERVICE_NAME)
 
 # Stops and removes the running container.
 stop:
@@ -56,6 +58,6 @@ camera:
 	docker run --rm --network $(NETWORK) \
 	  -e ML_SERVICE_URL=http://$(SERVICE_NAME):$(PORT)/api/predict \
 	  camera 
-	  
+
 shell:
-	docker run --rm -it -v "$(pwd):/app" $(SERVICE_NAME) /bin/bash
+	docker run --rm -it -v "$(shell pwd):/app" $(SERVICE_NAME) /bin/bash
