@@ -1,15 +1,15 @@
 import os
-import requests
-from datetime import datetime
 import sys
 import logging
 import traceback
 import socket
-
 import time
+import base64
+import cv2  # Requires: pip install opencv-python
+import requests
+from datetime import datetime
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
 
 # Configure logging
 logging.basicConfig(
@@ -221,16 +221,57 @@ def process_capture(image_data):
     return result, 200
 
 
+def capture_image():
+    """
+    Capture an image from the webcam, encode it as JPEG, and return a base64 string.
+    """
+    logger.info("Attempting to open webcam for image capture")
+    cap = cv2.VideoCapture(0)
+    if not cap.isOpened():
+        logger.error("Cannot open webcam")
+        return None
+
+    ret, frame = cap.read()
+    cap.release()
+
+    if not ret:
+        logger.error("Failed to capture image from webcam")
+        return None
+
+    # Encode the image as JPEG
+    ret, buffer = cv2.imencode(".jpg", frame)
+    if not ret:
+        logger.error("Failed to encode captured image")
+        return None
+
+    jpg_bytes = buffer.tobytes()
+    # Encode the bytes in base64 to safely include in JSON
+    encoded_image = base64.b64encode(jpg_bytes).decode("utf-8")
+    logger.info("Image captured and encoded successfully")
+    return encoded_image
+
+
 def main():
     logger.info("Camera service starting")
 
     # Log network configuration for debugging
     log_network_info()
 
-    # Optionally, you can pass an image as the first argument. Default is "dummy".
-    image_data = sys.argv[1] if len(sys.argv) > 1 else "dummy"
-    logger.info(f"Processing capture with image data: {image_data[:20]}...")
+    # If an image path or data is provided via command line, use that.
+    # Otherwise, capture a new image from the webcam.
+    if len(sys.argv) > 1 and sys.argv[1] != "dummy":
+        image_data = sys.argv[1]
+        logger.info("Using provided image data from command line argument")
+    else:
+        logger.info("No valid image data provided, capturing from webcam")
+        image_data = capture_image()
+        if image_data is None:
+            logger.error("Image capture failed, exiting")
+            sys.exit(1)
 
+    logger.info(
+        f"Processing capture with image data (first 20 chars): {image_data[:20]}..."
+    )
     result, status = process_capture(image_data)
     logger.info(f"Process completed with status: {status}")
     logger.debug(f"Result: {result}")
