@@ -87,6 +87,16 @@ def add_student():
     return jsonify({"message": "Student added successfully"}), 201
 
 
+@app.route("/api/health", methods=["GET"])
+def health():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM students")
+    count = cursor.fetchone()[0]
+    conn.close()
+    return jsonify({"status": "ok", "student_count": count})
+
+
 if __name__ == "__main__":
 
     app.run(host="0.0.0.0", port=5002)
