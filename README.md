@@ -12,7 +12,7 @@ This project is a multi-service application that integrates a machine learning s
 ## Prerequisites
 
 - [Docker](https://www.docker.com/) installed and running.
-- Basic familiarity with Docker and Makefiles.
+- Basic familiarity with Docker and Docker Compose.
 
 ## Getting Started
 
@@ -21,24 +21,92 @@ This project is a multi-service application that integrates a machine learning s
    ```bash
    git clone <repository-url>
    cd <repository-directory>
-2. Build and run all services:
+   ```
 
-From the repository root, run:
+2. **Build and run all services:**
+
+   There are multiple ways to build and run the services:
+
+   **Option 1:** Using Docker Compose directly (recommended):
+   ```bash
+   # Build and start all services
+   docker-compose up
+   
+   # Or to rebuild from scratch:
+   docker-compose up --build
+   
+   # To run in background mode:
+   docker-compose up -d
+   ```
+
+   **Option 2:** Using Makefiles:
+   ```bash
+   make all
+   ```
+   
+   **Option 3:** Run camera service which triggers the pipeline:
+   ```bash 
+   docker-compose run camera
+   ```
+
+3. **Running individual services:**
+
+   You can also build or run services individually:
+
+   - Using Docker Compose:
+     ```bash
+     docker-compose up ml-service
+     docker-compose up database
+     docker-compose up frontend
+     ```
+
+   - Using Makefiles:
+     ```bash
+     make ml_service
+     make database
+     make frontend
+     make camera
+     ```
+
+## Testing the Services
+
+After running `docker-compose up`, you can test each service individually using curl commands:
+
+### ML Service Tests
 
 ```bash
-make all
+# Test the ML service health endpoint
+curl http://localhost:5001/api/health
+
+# Test face recognition with a sample image
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d "{\"Image\": {\"Bytes\": \"$(base64 -i ./database/db_images/jayvin.jpg)\"} }" \
+  http://localhost:5001/api/predict
 ```
-or 
-```bash 
-docker-compose run camera
+
+### Database Service Tests
+
+```bash
+# Check database health
+curl http://localhost:5002/api/health
+
+# Get a student by ID
+curl http://localhost:5002/api/student?studentId=jayvin
+
+# Add a new student
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"studentId": "newstudent", "name": "New Student", "email": "new@example.com", "photoReference": "newstudent.jpg"}' \
+  http://localhost:5002/api/student
 ```
-Either command will: Build and run the  frontend, database, ml service and finally the "camera" service. The camera service then hits the frontend, database, and ml service with requests to fulfill the pipeline.  
 
-3.  Running individual services:
+## Stopping the Services
 
-You can also build or run services individually:
+```bash
+# Stop all services but keep volumes
+docker-compose down
 
-- ml_service: make ml_service
-- frontend: make frontend
-- database: make database
-- camera: make camera
+# Stop services and remove volumes (complete cleanup)
+docker-compose down -v
+```

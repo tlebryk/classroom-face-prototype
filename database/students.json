@@ -1,0 +1,38 @@
+[
+    {
+      "studentId": "jayvin",
+      "name": "Jayvin Smith",
+      "email": "jayvin@example.com",
+      "photoReference": "jayvin.jpg"
+    },
+    {
+      "studentId": "enrique",
+      "name": "Enrique Diaz",
+      "email": "enrique@example.com",
+      "photoReference": "enrique.png"
+    },
+    {
+      "studentId": "michelle", 
+      "name": "Michelle Wong",
+      "email": "michelle@example.com",
+      "photoReference": "michelle.jpg"
+    },
+    {
+      "studentId": "sarah",
+      "name": "Sarah Johnson",
+      "email": "sarah@example.com",
+      "photoReference": "sarah"
+    },
+    {
+      "studentId": "steven",
+      "name": "Steven Lee", 
+      "email": "steven@example.com",
+      "photoReference": "steven"
+    },
+    {
+      "studentId": "theo",
+      "name": "Theo Parker",
+      "email": "theo@example.com", 
+      "photoReference": "theo.png"
+    }
+  ]

@@ -67,3 +67,22 @@ def save_decoded_image(encoded_image):
     except Exception as e:
         logging.error(f"Error decoding and saving image: {e}")
         return None
+
+
+def decode_image_to_rgb(encoded_image):
+    try:
+        img_bytes = base64.b64decode(encoded_image)
+        
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if img is None:
+            logging.error("Failed to decode image to RGB.")
+            return None
+        
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        return img_rgb
+        
+    except Exception as e:
+        logging.error(f"Error decoding image to RGB: {e}")
+        return None
