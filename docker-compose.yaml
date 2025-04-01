@@ -7,8 +7,16 @@ services:
       target: production
     ports:
       - "5001:5001"
+    environment:
+      - DATABASE_URL=http://database:5002
+      - REFERENCE_FACES_DIR=/app/reference_faces
+    volumes:
+      # Use the shared volume for reference faces
+      - database-images:/app/reference_faces
     networks:
       - app-network
+    depends_on:
+      - database
 
   database:
     build:
@@ -16,6 +24,9 @@ services:
       target: runtime
     ports:
       - "5002:5002"
+    volumes:
+      # Volume for sharing images with ML service
+      - database-images:/app/images
     networks:
       - app-network
 
@@ -42,6 +53,9 @@ services:
       - frontend
     networks:
       - app-network
+
+volumes:
+  database-images:
 
 networks:
   app-network:
