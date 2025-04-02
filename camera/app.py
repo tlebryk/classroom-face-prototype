@@ -9,6 +9,7 @@ import traceback
 from datetime import datetime
 
 import cv2  # Requires: pip install opencv-python
+import numpy as np
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -219,38 +220,91 @@ def process_capture(image_data, seat_id=None):
     }
     logger.info("Image capture processing completed successfully")
     return result, 200
-
-
 def capture_image():
     """
-    Capture an image from the webcam, encode it as JPEG, and return a base64 string.
+    Capture an image from the webcam, enhance quality, and return a base64 string.
     """
     logger.info("Attempting to open webcam for image capture")
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         logger.error("Cannot open webcam")
         return None
-
+        
+    # Try to set better camera parameters (may not work on all webcams)
+    cap.set(cv2.CAP_PROP_BRIGHTNESS, 150)  # Increase brightness (0-255)
+    cap.set(cv2.CAP_PROP_CONTRAST, 150)    # Increase contrast (0-255)
+    cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # Auto exposure
+    
+    # Capture frame
     ret, frame = cap.read()
     cap.release()
 
     if not ret:
         logger.error("Failed to capture image from webcam")
         return None
-
-    cv2.imwrite("captured_image.jpg", frame)
-    print("Image saved as captured_image.jpg")
-    # Encode the image as JPEG
-    ret, buffer = cv2.imencode(".jpg", frame)
+    
+    # Enhance image quality for better face detection
+    enhanced_frame = enhance_image_quality(frame)
+    
+    # Save both original and enhanced images for comparison
+    cv2.imwrite("captured_image_original.jpg", frame)
+    cv2.imwrite("captured_image.jpg", enhanced_frame)
+    print("Images saved as captured_image.jpg and captured_image_original.jpg")
+    
+    # Encode the enhanced image as JPEG
+    ret, buffer = cv2.imencode(".jpg", enhanced_frame)
     if not ret:
         logger.error("Failed to encode captured image")
         return None
+        
     jpg_bytes = buffer.tobytes()
     # Encode the bytes in base64 to safely include in JSON
     encoded_image = base64.b64encode(jpg_bytes).decode("utf-8")
-    logger.info("Image captured and encoded successfully")
+    logger.info("Image captured, enhanced, and encoded successfully")
     return encoded_image
 
+def enhance_image_quality(image):
+    """
+    Enhance image quality to improve face detection in low light conditions.
+    """
+    # Make a copy to avoid modifying the original
+    enhanced = image.copy()
+    
+    # 1. Convert to LAB color space for better contrast enhancement
+    if len(enhanced.shape) == 3:  # Color image
+        lab = cv2.cvtColor(enhanced, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        
+        # 2. Apply CLAHE (Contrast Limited Adaptive Histogram Equalization) to L channel
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
+        
+        # 3. Merge channels back
+        enhanced_lab = cv2.merge((cl, a, b))
+        enhanced = cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2BGR)
+    else:  # Grayscale image
+        # Apply CLAHE directly
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(enhanced)
+    
+    # 4. Additional brightness adjustment if needed
+    # Calculate average brightness
+    avg_brightness = np.mean(enhanced)
+    
+    # If image is still dark after CLAHE, boost brightness further
+    if avg_brightness < 100:  # Adjust threshold based on testing
+        # Create a brightness increase matrix
+        brightness_increase = min(50, 120 - avg_brightness)  # Avoid excessive brightening
+        enhanced = cv2.convertScaleAbs(enhanced, alpha=1.0, beta=brightness_increase)
+    
+    # 5. Optional: Slight sharpening for better facial features
+    kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+    enhanced = cv2.filter2D(enhanced, -1, kernel)
+    
+    # 6. Optional: Slight noise reduction
+    enhanced = cv2.GaussianBlur(enhanced, (3, 3), 0)
+    
+    return enhanced
 
 def main():
     parser = argparse.ArgumentParser(description="Run camera service")
