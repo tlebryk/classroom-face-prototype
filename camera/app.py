@@ -254,17 +254,23 @@ def capture_image():
 
 def main():
     parser = argparse.ArgumentParser(description="Run camera service")
+
     parser.add_argument(
-        "image_data",
+        "-i",
+        "--image_data",
         nargs="?",
         help="Base64 encoded image data to process (or capture from webcam if not provided)",
     )
     parser.add_argument(
+        "-s",
         "--seat_id",
         help="Seat ID to associate with the captured student (or set via SEAT_ID environment variable)",
     )
     parser.add_argument(
-        "--debug", action="store_true", help="Enable debug logging (default: info)"
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Enable debug logging (default: info)",
     )
     args = parser.parse_args()
 
