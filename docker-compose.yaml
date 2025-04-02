@@ -6,7 +6,7 @@ services:
       context: ./ml_service
       target: production
     ports:
-      - "5001:5001"
+      - "0.0.0.0:5001:5001"
     environment:
       - DATABASE_URL=http://database:5002
       - REFERENCE_FACES_DIR=/app/reference_faces
@@ -35,7 +35,7 @@ services:
       context: ./frontend
       target: production
     ports:
-      - "3000:3000"
+      - "0.0.0.0:3000:3000"
     networks:
       - app-network
 
