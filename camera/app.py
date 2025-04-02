@@ -35,7 +35,7 @@ def log_network_info():
 
     # Log environment variables
     ml_service_url = os.environ.get(
-        "ML_SERVICE_URL", "http://localhost:5001/api/predict"
+        "ML_SERVICE_URL", "http://localhost:8000/api/predict"
     )
     logger.info(f"ML_SERVICE_URL = {ml_service_url}")
 
@@ -66,7 +66,7 @@ def log_network_info():
 
 def call_ml_service(image_data):
     ML_SERVICE_URL = os.environ.get(
-        "ML_SERVICE_URL", "http://localhost:5001/api/predict"
+        "ML_SERVICE_URL", "http://localhost:8000/api/predict"
     )
     logger.info(f"Calling ML service at: {ML_SERVICE_URL}")
 

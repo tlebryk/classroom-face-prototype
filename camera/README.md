@@ -28,7 +28,7 @@ Set Environment Variables:
 
 The following environment variables are used by the service (defaults provided in the Makefile):
 
-ML_SERVICE_URL (default: http://localhost:5001/api/predict)
+ML_SERVICE_URL (default: http://localhost:8000/api/predict)
 
 STUDENT_DB_URL (default: http://localhost:5000/api/student)
 
@@ -70,6 +70,57 @@ Dockerfile: Multi-stage build (base, test, and runtime stages) for streamlined d
 
 tests/test_app.py: Pytest-based unit tests covering ML service integration, student DB queries, frontend updates, and overall capture processing.
 
-## TODO
-- add integration with device camera. 
-- have real image serialization to send to ml-service
+## Running distributed
+ 
+1. Get the ip address of the ml_service and frontend. If you've run docker compose from one machine on the other services, this address is the same for both services (most common setup). 
+   -   **Windows:**
+      
+      ```bash
+      ipconfig
+      
+      ```
+      
+      Look for the IPv4 Address under the active network.
+      
+   -   **Mac/Linux:**
+      
+      ```bash
+      ifconfig | grep "inet "
+      
+      ```
+    It is usually the last address which matches. It is usually something like 10.255.255.255.
+
+2. Set environment variables specifying the ip addresses you care about 
+   -   **Windows:**
+      
+      ```bash
+      set ML_SERVICE_URL="http://<ml_service_address>:8000/api/predict"
+      set FRONTEND_UI_URL="http://<frondend_address>::3000/api/classroom/update"
+      
+      ```
+      
+   -   **Mac/Linux:**
+      
+      ```bash
+         export ML_SERVICE_URL="http://<ml_service_address>:8000/api/predict"
+         export FRONTEND_UI_URL="http://<frondend_address>::3000/api/classroom/update"
+      ```
+3. Set the seat ID (optional)
+   -   **Windows:**
+      
+      ```bash
+      set SEAT_ID="seat1"
+      
+      ```
+      
+   -   **Mac/Linux:**
+      
+      ```bash
+         export SEAT_ID="seat1"
+      ```
+   You can also add this as a command line arg to the script like so: `python app.py -s seat1`. In the current classroom, the max seat_id is seat12. 
+4. Run the camera script
+
+```bash
+python app.py
+```

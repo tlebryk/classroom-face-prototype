@@ -7,7 +7,7 @@ HOST_PORT ?= 5000
 CONTAINER_PORT ?= 5000
 
 # Environment variables for the real app
-ML_SERVICE_URL ?= http://ml-service:5001/api/predict
+ML_SERVICE_URL ?= http://ml-service:8000/api/predict
 STUDENT_DB_URL ?= http://database:5002/api/student
 FRONTEND_UI_URL ?= http://frontend:3000/api/classroom/update
 

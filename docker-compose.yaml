@@ -6,7 +6,7 @@ services:
       context: ./ml_service
       target: production
     ports:
-      - "5001:5001"
+      - "0.0.0.0:8000:8000"
     environment:
       - DATABASE_URL=http://database:5002
       - REFERENCE_FACES_DIR=/app/reference_faces
@@ -35,7 +35,7 @@ services:
       context: ./frontend
       target: production
     ports:
-      - "3000:3000"
+      - "0.0.0.0:3000:3000"
     networks:
       - app-network
 
@@ -44,7 +44,7 @@ services:
   #     context: ./camera
   #     target: runtime
   #   environment:
-  #     - ML_SERVICE_URL=http://ml-service:5001/api/predict
+  #     - ML_SERVICE_URL=http://ml-service:8000/api/predict
   #     - STUDENT_DB_URL=http://database:5002/api/student
   #     - FRONTEND_UI_URL=http://frontend:3000/api/classroom/update
   #   depends_on:
