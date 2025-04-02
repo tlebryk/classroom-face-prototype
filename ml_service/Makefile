@@ -2,8 +2,8 @@
 
 # Default values - can be overridden at runtime
 NETWORK ?= app-network
-PORT ?= 5001
-HOST_PORT ?= 5001
+PORT ?= 8000
+HOST_PORT ?= 8000
 SERVICE_NAME ?= ml-service
 
 # Runs the tests in the tester stage.
@@ -21,7 +21,7 @@ run-local:
 
 # Runs the production container in a network (for integration testing).
 run:
-	docker run --init -d -p 5001:5001 \
+	docker run --init -d -p 8000:8000 \
 	--name ml-service \
 	-e DATABASE_URL=http://database:5002 \
 	-e REFERENCE_FACES_DIR=/app/reference_faces \

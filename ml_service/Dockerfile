@@ -32,5 +32,5 @@ ENV IMAGE_OUTPUT_DIR="/app/output"
 # Create output directory for saved images
 RUN mkdir -p /app/output
 
-EXPOSE 5001
-CMD ["gunicorn", "-b", "0.0.0.0:5001", "app:app"]
+EXPOSE 8000
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]

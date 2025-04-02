@@ -184,7 +184,7 @@ make all     # Run tests, build, and start the service
 
 **Health Check:**
 ```bash
-curl http://localhost:5001/api/health
+curl http://localhost:8000/api/health
 ```
 
 **Face Recognition:**
@@ -193,7 +193,7 @@ curl http://localhost:5001/api/health
 curl -X POST \
   -H "Content-Type: application/json" \
   -d "{\"Image\": {\"Bytes\": \"$(base64 -i ./database/db_images/jayvin.jpg)\"} }" \
-  http://localhost:5001/api/predict
+  http://localhost:8000/api/predict
 ```
 
 ## How It Works

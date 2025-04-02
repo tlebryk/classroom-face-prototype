@@ -4,7 +4,7 @@ This project is a multi-service application that integrates a machine learning s
 
 ## Services
 
-- **ml_service**: Provides ML-based face detection/recognition (exposes HTTP endpoints on port 5001).
+- **ml_service**: Provides ML-based face detection/recognition (exposes HTTP endpoints on port 8000).
 - **frontend**: Hosts the user interface and classroom updates (exposes HTTP endpoints on port 3000).
 - **database**: Manages student data (exposes HTTP endpoints on port 5002).
 - **camera**: A one-shot service that captures an image, processes it, and triggers updates in the other services.
@@ -76,13 +76,13 @@ After running `docker-compose up`, you can test each service individually using 
 
 ```bash
 # Test the ML service health endpoint
-curl http://localhost:5001/api/health
+curl http://localhost:8000/api/health
 
 # Test face recognition with a sample image
 curl -X POST \
   -H "Content-Type: application/json" \
   -d "{\"Image\": {\"Bytes\": \"$(base64 -i ./database/db_images/jayvin.jpg)\"} }" \
-  http://localhost:5001/api/predict
+  http://localhost:8000/api/predict
 ```
 
 ### Database Service Tests

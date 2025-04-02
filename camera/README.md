@@ -28,7 +28,7 @@ Set Environment Variables:
 
 The following environment variables are used by the service (defaults provided in the Makefile):
 
-ML_SERVICE_URL (default: http://localhost:5001/api/predict)
+ML_SERVICE_URL (default: http://localhost:8000/api/predict)
 
 STUDENT_DB_URL (default: http://localhost:5000/api/student)
 
