@@ -49,3 +49,6 @@ test-from-container:
 	  -X POST http://$(SERVICE_NAME):$(PORT)/api/classroom/update \
 	  -H "Content-Type: application/json" \
 	  -d '{"studentId": "stu123", "name": "Andre Johnson", "seatId": "seat1", "confidence": 0.92, "lastSeen": "2025-03-28T12:34:56Z"}'
+
+shell:
+	docker run --rm -it -v "$(pwd):/app" $(SERVICE_NAME) /bin/bash

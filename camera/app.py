@@ -1,13 +1,15 @@
-import os
-import sys
-import logging
-import traceback
-import socket
-import time
+import argparse
 import base64
+import logging
+import os
+import socket
+import sys
+import time
+import traceback
+from datetime import datetime
+
 import cv2  # Requires: pip install opencv-python
 import requests
-from datetime import datetime
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -164,7 +166,7 @@ def update_frontend(update_payload):
         raise
 
 
-def process_capture(image_data):
+def process_capture(image_data, seat_id=None):
     logger.info("Starting image capture processing")
 
     try:
@@ -174,31 +176,29 @@ def process_capture(image_data):
         logger.error(f"ML service processing failed: {str(e)}")
         return {"error": str(e)}, 500
 
-    if not ml_result.get("FaceMatches"):
+    # Check if a match was found and if the similarity is over 50%
+    if not ml_result.get("match") or ml_result.get("similarity", 0) < 50:
         logger.warning("No face detected or low confidence in ML results")
         return {"error": "No face detected or low confidence"}, 400
 
-    face_match = ml_result["FaceMatches"][0]
-    predicted_student_id = face_match["Face"].get("ExternalImageId")
-    confidence = face_match["Face"].get("Confidence")
-    logger.info(
-        f"Face detected: Student ID = {predicted_student_id}, Confidence = {confidence}"
+    # Extract student info directly from the ML result
+    predicted_student_id = ml_result.get("studentId", None)
+    student_info = ml_result.get("studentInfo", {})
+    similarity = (
+        ml_result.get("similarity", 0) / 100
+        if ml_result.get("similarity", 0) > 1
+        else ml_result.get("similarity", 0)
     )
 
-    try:
-        logger.info("Querying student database for student details")
-        student_data = query_student_db(predicted_student_id)
-    except Exception as e:
-        logger.error(f"Student DB query failed: {str(e)}")
-        return {"error": str(e)}, 500
+    logger.info(
+        f"Face detected: Student ID = {predicted_student_id}, Similarity = {similarity}"
+    )
 
-    # For simplicity, assign a static seat.
-    seat_id = "seat5"
     update_payload = {
-        "studentId": predicted_student_id,
-        "name": student_data.get("name", ""),
+        "studentId": predicted_student_id if predicted_student_id else None,
+        "name": student_info.get("name", None),
         "seatId": seat_id,
-        "confidence": confidence / 100 if confidence > 1 else confidence,
+        "confidence": similarity,
         "lastSeen": datetime.utcnow().isoformat() + "Z",
     }
     logger.info(f"Prepared frontend update payload: {update_payload}")
@@ -212,7 +212,7 @@ def process_capture(image_data):
 
     result = {
         "ml_result": ml_result,
-        "student_data": student_data,
+        "student_info": student_info,
         "frontend_update": update_payload,
         "frontend_response": frontend_response,
         "message": "Capture and update successful",
@@ -238,12 +238,13 @@ def capture_image():
         logger.error("Failed to capture image from webcam")
         return None
 
+    cv2.imwrite("captured_image.jpg", frame)
+    print("Image saved as captured_image.jpg")
     # Encode the image as JPEG
     ret, buffer = cv2.imencode(".jpg", frame)
     if not ret:
         logger.error("Failed to encode captured image")
         return None
-
     jpg_bytes = buffer.tobytes()
     # Encode the bytes in base64 to safely include in JSON
     encoded_image = base64.b64encode(jpg_bytes).decode("utf-8")
@@ -252,27 +253,49 @@ def capture_image():
 
 
 def main():
-    logger.info("Camera service starting")
+    parser = argparse.ArgumentParser(description="Run camera service")
 
-    # Log network configuration for debugging
-    log_network_info()
+    parser.add_argument(
+        "-i",
+        "--image_data",
+        nargs="?",
+        help="Base64 encoded image data to process (or capture from webcam if not provided)",
+    )
+    parser.add_argument(
+        "-s",
+        "--seat_id",
+        help="Seat ID to associate with the captured student (or set via SEAT_ID environment variable)",
+    )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Enable debug logging (default: info)",
+    )
+    args = parser.parse_args()
 
-    # If an image path or data is provided via command line, use that.
-    # Otherwise, capture a new image from the webcam.
-    if len(sys.argv) > 1 and sys.argv[1] != "dummy":
-        image_data = sys.argv[1]
-        logger.info("Using provided image data from command line argument")
-    else:
-        logger.info("No valid image data provided, capturing from webcam")
+    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
+
+    image_data = args.image_data
+    seat_id = args.seat_id
+
+    if not image_data:
+        logger.info("No image data provided, capturing from webcam")
         image_data = capture_image()
         if image_data is None:
             logger.error("Image capture failed, exiting")
             sys.exit(1)
 
+    if not seat_id:
+        seat_id = os.environ.get("SEAT_ID", None)
+        if not seat_id:
+            logger.error("No seat ID provided, exiting")
+            sys.exit(1)
+
     logger.info(
         f"Processing capture with image data (first 20 chars): {image_data[:20]}..."
     )
-    result, status = process_capture(image_data)
+    result, status = process_capture(image_data, seat_id)
     logger.info(f"Process completed with status: {status}")
     logger.debug(f"Result: {result}")
 

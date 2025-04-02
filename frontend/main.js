@@ -15,7 +15,7 @@ let classroomData = {
                 { seatId: 'table1-seat1', student: null },
                 { seatId: 'table1-seat2', student: null },
                 { seatId: 'table1-seat3', student: null },
-                { seatId: 'table1-seat4', student: { studentId: 'stu123', name: 'Alice Johnson' } },
+                { seatId: 'table1-seat4', student: null },
                 { seatId: 'table1-seat5', student: null },
                 { seatId: 'table1-seat6', student: null }
             ]
@@ -23,11 +23,11 @@ let classroomData = {
         {
             tableId: 'table2',
             seats: [
-                { seatId: 'table2-seat1', student: null },
-                { seatId: 'table2-seat2', student: { studentId: 'stu456', name: 'Bob Smith' } },
+                { seatId: 'table2-seat1', student: null }, // seat 7 
+                { seatId: 'table2-seat2', student: null }, // seat 8 etc. 
                 { seatId: 'table2-seat3', student: null },
                 { seatId: 'table2-seat4', student: null },
-                { seatId: 'table2-seat5', student: { studentId: 'stu789', name: 'Charlie Brown' } },
+                { seatId: 'table2-seat5', student: null },
                 { seatId: 'table2-seat6', student: null }
             ]
         }

@@ -21,10 +21,13 @@ run-local:
 
 # Runs the production container in a network (for integration testing).
 run:
-	-docker network create $(NETWORK) 2>/dev/null || true
-	docker run --init -d -p $(HOST_PORT):$(PORT) --name $(SERVICE_NAME) \
-	-v $(PWD)/output:/tmp \
-	--network $(NETWORK) $(SERVICE_NAME)
+	docker run --init -d -p 5001:5001 \
+	--name ml-service \
+	-e DATABASE_URL=http://database:5002 \
+	-e REFERENCE_FACES_DIR=/app/reference_faces \
+	-v database-images:/app/reference_faces \
+	--network $(NETWORK) \
+	ml-service
 
 # Stops and removes the running container.
 stop:
@@ -42,17 +45,18 @@ all: stop build run
 # Use curl to test the running container endpoint from the host.
 test-curl:
 	@echo "Testing POST /api/predict"
-	curl -X POST http://localhost:$(HOST_PORT)/api/predict \
+	@base64 -i $(abspath ../database/db_images/jayvin.jpg) > /tmp/encoded_image.txt
+	@curl -X POST http://localhost:$(HOST_PORT)/api/predict \
 	  -H "Content-Type: application/json" \
-	  -d '{"CollectionId": "student-gallery", "Image": {"Bytes": "dummy"}, "MaxFaces": 1, "FaceMatchThreshold": 80}'
+	  -d "{\"Image\": {\"Bytes\": \"$$(cat /tmp/encoded_image.txt)\"} }"
+	@rm -f /tmp/encoded_image.txt
 	@echo ""
-
 # Test from another container (useful for debugging integration)
 test-from-container:
 	docker run --rm --network $(NETWORK) curlimages/curl:latest \
 	  -X POST http://$(SERVICE_NAME):$(PORT)/api/predict \
 	  -H "Content-Type: application/json" \
-	  -d '{"CollectionId": "student-gallery", "Image": {"Bytes": "dummy"}, "MaxFaces": 1, "FaceMatchThreshold": 80}'
+	  -d "{"Image": {"Bytes": "$(base64 -i ./database/db_images/jayvin.jpg)"} }" 
 
 camera:
 	docker run --rm --network $(NETWORK) \
