@@ -39,20 +39,20 @@ services:
     networks:
       - app-network
 
-  camera:
-    build:
-      context: ./camera
-      target: runtime
-    environment:
-      - ML_SERVICE_URL=http://ml-service:5001/api/predict
-      - STUDENT_DB_URL=http://database:5002/api/student
-      - FRONTEND_UI_URL=http://frontend:3000/api/classroom/update
-    depends_on:
-      - ml-service
-      - database
-      - frontend
-    networks:
-      - app-network
+  # camera:
+  #   build:
+  #     context: ./camera
+  #     target: runtime
+  #   environment:
+  #     - ML_SERVICE_URL=http://ml-service:5001/api/predict
+  #     - STUDENT_DB_URL=http://database:5002/api/student
+  #     - FRONTEND_UI_URL=http://frontend:3000/api/classroom/update
+  #   depends_on:
+  #     - ml-service
+  #     - database
+  #     - frontend
+  #   networks:
+  #     - app-network
 
 volumes:
   database-images:

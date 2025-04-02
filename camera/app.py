@@ -174,31 +174,31 @@ def process_capture(image_data):
         logger.error(f"ML service processing failed: {str(e)}")
         return {"error": str(e)}, 500
 
-    if not ml_result.get("FaceMatches"):
+    # Check if a match was found and if the similarity is over 50%
+    if not ml_result.get("match") or ml_result.get("similarity", 0) < 50:
         logger.warning("No face detected or low confidence in ML results")
         return {"error": "No face detected or low confidence"}, 400
 
-    face_match = ml_result["FaceMatches"][0]
-    predicted_student_id = face_match["Face"].get("ExternalImageId")
-    confidence = face_match["Face"].get("Confidence")
-    logger.info(
-        f"Face detected: Student ID = {predicted_student_id}, Confidence = {confidence}"
+    # Extract student info directly from the ML result
+    predicted_student_id = ml_result.get("studentId", None)
+    student_info = ml_result.get("studentInfo", {})
+    similarity = (
+        ml_result.get("similarity", 0) / 100
+        if ml_result.get("similarity", 0) > 1
+        else ml_result.get("similarity", 0)
     )
 
-    try:
-        logger.info("Querying student database for student details")
-        student_data = query_student_db(predicted_student_id)
-    except Exception as e:
-        logger.error(f"Student DB query failed: {str(e)}")
-        return {"error": str(e)}, 500
+    logger.info(
+        f"Face detected: Student ID = {predicted_student_id}, Similarity = {similarity}"
+    )
 
     # For simplicity, assign a static seat.
     seat_id = "seat5"
     update_payload = {
-        "studentId": predicted_student_id,
-        "name": student_data.get("name", ""),
+        "studentId": predicted_student_id if predicted_student_id else None,
+        "name": student_info.get("name", None),
         "seatId": seat_id,
-        "confidence": confidence / 100 if confidence > 1 else confidence,
+        "confidence": similarity,
         "lastSeen": datetime.utcnow().isoformat() + "Z",
     }
     logger.info(f"Prepared frontend update payload: {update_payload}")
@@ -212,7 +212,7 @@ def process_capture(image_data):
 
     result = {
         "ml_result": ml_result,
-        "student_data": student_data,
+        "student_info": student_info,
         "frontend_update": update_payload,
         "frontend_response": frontend_response,
         "message": "Capture and update successful",
