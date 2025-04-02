@@ -23,8 +23,8 @@ let classroomData = {
         {
             tableId: 'table2',
             seats: [
-                { seatId: 'table2-seat1', student: null },
-                { seatId: 'table2-seat2', student: null },
+                { seatId: 'table2-seat1', student: null }, // seat 7 
+                { seatId: 'table2-seat2', student: null }, // seat 8 etc. 
                 { seatId: 'table2-seat3', student: null },
                 { seatId: 'table2-seat4', student: null },
                 { seatId: 'table2-seat5', student: null },

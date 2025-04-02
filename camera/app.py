@@ -1,13 +1,15 @@
-import os
-import sys
-import logging
-import traceback
-import socket
-import time
+import argparse
 import base64
+import logging
+import os
+import socket
+import sys
+import time
+import traceback
+from datetime import datetime
+
 import cv2  # Requires: pip install opencv-python
 import requests
-from datetime import datetime
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -164,7 +166,7 @@ def update_frontend(update_payload):
         raise
 
 
-def process_capture(image_data):
+def process_capture(image_data, seat_id=None):
     logger.info("Starting image capture processing")
 
     try:
@@ -192,8 +194,6 @@ def process_capture(image_data):
         f"Face detected: Student ID = {predicted_student_id}, Similarity = {similarity}"
     )
 
-    # For simplicity, assign a static seat.
-    seat_id = "seat5"
     update_payload = {
         "studentId": predicted_student_id if predicted_student_id else None,
         "name": student_info.get("name", None),
@@ -253,27 +253,43 @@ def capture_image():
 
 
 def main():
-    logger.info("Camera service starting")
+    parser = argparse.ArgumentParser(description="Run camera service")
+    parser.add_argument(
+        "image_data",
+        nargs="?",
+        help="Base64 encoded image data to process (or capture from webcam if not provided)",
+    )
+    parser.add_argument(
+        "--seat_id",
+        help="Seat ID to associate with the captured student (or set via SEAT_ID environment variable)",
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="Enable debug logging (default: info)"
+    )
+    args = parser.parse_args()
 
-    # Log network configuration for debugging
-    log_network_info()
+    logger.setLevel(logging.DEBUG if args.debug else logging.INFO)
 
-    # If an image path or data is provided via command line, use that.
-    # Otherwise, capture a new image from the webcam.
-    if len(sys.argv) > 1 and sys.argv[1] != "dummy":
-        image_data = sys.argv[1]
-        logger.info("Using provided image data from command line argument")
-    else:
-        logger.info("No valid image data provided, capturing from webcam")
+    image_data = args.image_data
+    seat_id = args.seat_id
+
+    if not image_data:
+        logger.info("No image data provided, capturing from webcam")
         image_data = capture_image()
         if image_data is None:
             logger.error("Image capture failed, exiting")
             sys.exit(1)
 
+    if not seat_id:
+        seat_id = os.environ.get("SEAT_ID", None)
+        if not seat_id:
+            logger.error("No seat ID provided, exiting")
+            sys.exit(1)
+
     logger.info(
         f"Processing capture with image data (first 20 chars): {image_data[:20]}..."
     )
-    result, status = process_capture(image_data)
+    result, status = process_capture(image_data, seat_id)
     logger.info(f"Process completed with status: {status}")
     logger.debug(f"Result: {result}")
 
