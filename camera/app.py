@@ -238,12 +238,13 @@ def capture_image():
         logger.error("Failed to capture image from webcam")
         return None
 
+    cv2.imwrite("captured_image.jpg", frame)
+    print("Image saved as captured_image.jpg")
     # Encode the image as JPEG
     ret, buffer = cv2.imencode(".jpg", frame)
     if not ret:
         logger.error("Failed to encode captured image")
         return None
-
     jpg_bytes = buffer.tobytes()
     # Encode the bytes in base64 to safely include in JSON
     encoded_image = base64.b64encode(jpg_bytes).decode("utf-8")
